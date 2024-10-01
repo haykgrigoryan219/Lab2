@@ -1,0 +1,91 @@
+#include <iostream>
+#include <string>
+
+
+using namespace std;
+
+class Cypher
+{
+    public:
+        virtual char* encrypt(const string &plaintext) = 0;
+        virtual char* decrypt(const std::string &ciphertext) = 0;
+        
+        virtual ~Cypher() = 0;
+};
+Cypher::~Cypher() {}
+
+class TemplateMethodCypher : public Cypher
+{
+    private:
+        int length = 256;
+        char* arr1;
+        char* arr2; 
+    
+    int findIndex(char symbol)
+    {
+        int i = 0;
+        while(arr2[i] != symbol)
+        {
+            i++;
+        }
+        
+        return i;
+    }
+    
+    public:
+    TemplateMethodCypher()
+    {
+        arr1 = new char[length];
+        arr2 = new char[length];
+        
+        for(int i = 0; i < length; i++)
+        {
+            arr1[i] = (char)i;
+            arr2[i] = (char)(length - i);
+        }
+    }
+    
+    virtual char* encrypt(const string &plaintext) override {
+        char* newtext = new char[plaintext.length()];
+        
+        for(int i = 0; i < plaintext.length(); i++)
+        {
+            *(newtext + i) = arr2[(int)plaintext[i]];
+        }
+    
+        return newtext;
+    }
+    
+    virtual char* decrypt(const std::string &ciphertext) override {
+        char* newtext = new char[ciphertext.length()];
+        
+        for(int i = 0; i < ciphertext.length(); i++)
+        {
+            *(newtext + i) = arr1[findIndex(ciphertext[i])];
+        }
+    
+        return newtext;
+    }
+    
+    ~TemplateMethodCypher() override
+    {
+        delete[] arr1;
+        delete[] arr2;
+    }
+};
+
+int main() {
+    Cypher* cypher = new TemplateMethodCypher();
+    
+    string plaintext;
+    cout << "Enter the plaintext: ";
+    cin >> plaintext;
+    
+    string ciphertext = cypher->encrypt(plaintext);
+    cout << "Ciphertext: " << ciphertext << endl;
+
+    string decryptedText = cypher->decrypt(ciphertext);
+    cout << "Decrypted text: " << decryptedText << endl;
+
+    return 0;
+}
